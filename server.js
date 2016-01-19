@@ -4,7 +4,7 @@ var listenPort = 8080;
 var url = require('url');
 
 var getFullMo = function(moNum) {
-    console.log("testing!");
+//    console.log("testing!");
     switch (moNum) {
         case 0:
             return "January";
@@ -36,12 +36,29 @@ var getFullMo = function(moNum) {
 app.get('*', function(req, res) {
     var parsedURL = url.parse(req.url);
     var query = parsedURL.pathname.substring(1);
+    var validTime = false;
     query = decodeURI(query);
-    var date = new Date(query);
-    if (!isNaN(date)) {
+//    console.log("Query is" + query);
+    
+    if (typeof parseInt(query) === "number") {
+        //Numeric timestamp
+        if (!isNaN((new Date(parseInt(query) * 1000)).getMonth())) {
+//            console.log("Valid timestamp!");
+            var date = new Date(parseInt(query) * 1000);
+            validTime = true;
+        }
+    }
+    if (validTime == false && !isNaN(new Date(query).getMonth())) {
+        var date = new Date(query);
+//        console.log("Valid date string");
+        validTime = true;
+    }
+    
+    if (validTime === true) {
+//        console.log("valid time!");
         var dateTS = date.getTime(); //Gets time in MS
-    dateTS = parseInt(dateTS/1000, 10); //Drop the ms and make an int
-        var humanDate = getFullMo(date.getMonth()) + " " + date.getDay() + ", " + date.getFullYear();
+        dateTS = parseInt(dateTS/1000, 10); //Drop the ms and make an int
+        var humanDate = getFullMo(date.getMonth()) + " " + date.getDate() + ", " + date.getFullYear();
         var output = {"unix": dateTS, "natural": humanDate};
 
     }
